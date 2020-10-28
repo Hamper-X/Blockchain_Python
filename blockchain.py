@@ -36,11 +36,11 @@ class Blockchain:
         return self.chain[-1]                # Retorno do bloco anterior
 
     """
-        @ Função: verificação de prova de trabalho 
+        @ Função: criação de prova de trabalho 
         @ Parametros:
             - self (mostrando que é um metodo da classe)
             - previus_proof (proof do bloco anterior a ser validado)
-        @ Return: 
+        @ Return: new_proof (novo proof do bloco aceito)
     """
     def proof_of_work (self,previous_proof):
         new_proof = 1
@@ -52,3 +52,49 @@ class Blockchain:
                 check_proof = True
             else:
                 new_proof += 1
+        return new_proof
+
+    """
+        @ Função: Pegar o bloco e transforma em json, encriptografando-o com hash256  
+        @ Parametros:
+            - self (mostrando que é um metodo da classe)
+            - bloco (lista self.chain da classe)
+        @ Return: json encriptografado
+    """
+    def hash(self, block):
+        encoded_block = json.dumps(block, sort_keys=True).encode()   # Gerar um json ordenado pela chave com base no dicionario block
+        return hashlib.sha256(encoded_block).hexdigest()
+    
+    """
+        @ Função: Validação do blockchain  
+        @ Parametros:
+            - self (mostrando que é um metodo da classe)
+            - chain (lista de blocos do blockchain)
+        @ Return: validado ou nao (booleano)
+    """
+    def is_chain_valid(self,chain):
+        previous_block = chain[0]       # Incio no primeiro bloco
+        block_index = 1                 # Localização de bloco
+        while block_index < len(chain): # Loop para testar toda rede
+            block = chain[block_index]  
+            if block['previous_hash'] != self.hash(previous_block): # Primeira validação: Hash do bloco anterior com o atual
+                return False
+            previous_proof = previous_block['proof']
+            proof = block['proof']
+            hash_operation = hashlib.sha256(str(proof**2 - previous_proof**2).encode()).hexdigest()
+            if hash_operation[:4] != '0000':    # Verificação do nivel de dificuldade (4 zeros a esquerda)
+                return False
+            previous_block = block
+            block_index += 1
+            return True
+
+    """
+        @ Função: Mineração do bloco  
+        @ Parametros:   --//--
+        @ Return: 
+    """
+    def mine_block(self):
+        previous_block = get_previous_block()
+        previous_proof = previous_block['proof']
+        proof = proof_of_work(previous_proof)
+        previus_hash = hash(previous_block)
