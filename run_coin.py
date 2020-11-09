@@ -1,16 +1,15 @@
 # IMPORTS |=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
-
 import datetime     #pegar data e hora exata
 import hashlib      #criar e usar hashs especificas
 import json         #produzir e ler dados e json
+from flask import Flask, jsonify
 
-# CLASSE BLOCKCHAIN |=-=-=-=-=-=-=-=-=-=-=-
+# CLASSE BLOCKCHAIN |=-=-=-=-=-=-=-=-=-=-=-=
 class Blockchain:
 
     def __init__(self):
         self.chain = []
         self.create_block(proof = 1, previous_hash = '0')
-
 
     """
         @ Função: criar novo bloco na chain 
@@ -51,7 +50,6 @@ class Blockchain:
                 check_proof = True
             else:
                 new_proof += 1
-                print("nao deu certo ",new_proof)
         return new_proof
     
     """
@@ -88,25 +86,33 @@ class Blockchain:
             block_index += 1
         return True
 
+# MAIN /=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=--=-=
+app = Flask(__name__)
+app.config['JSONIFY_PRETTYPRINT_REGULAR'] = False
+
+
+blockchain = Blockchain()
+
 """
     @ Função: mineração do bloco
     @ Parametros:
         - Objeto blockchain
-    @ Return: json formatado com o bloco minerado
+    @ Return: json formatado com o bloco minerado e codigo de resposta
 """
-def mine_block(blockchain):
+
+@app.route('/mine_block', methods = ['GET'])
+def mine_block():
     previous_block = blockchain.get_previous_block()
     previous_proof = previous_block['proof']
     proof = blockchain.proof_of_work(previous_proof)
     previous_hash = blockchain.hash(previous_block)
     block = blockchain.create_block(proof, previous_hash)
-    response = {'message': 'Bloco minerado com sucesso!',
+    response = {'message': 'Parabens voce acabou de minerar um bloco!',
                 'index': block['index'],
                 'timestamp': block['timestamp'],
                 'proof': block['proof'],
                 'previous_hash': block['previous_hash']}
-    json_object = json.dumps(response, indent = 4)   
-    return json_object
+    return jsonify(response), 200  
 
 """
     @ Função: Mostrar toda rede blockchain  
@@ -114,11 +120,11 @@ def mine_block(blockchain):
         - Objeto blockchain
     @ Return: json formatado com o bloco minerado
 """
-def get_chain(blockchain):
+@app.route('/get_chain', methods = ['GET'])
+def get_chain():
     response = {'chain': blockchain.chain,
                 'length': len(blockchain.chain)}
-    json_object = json.dumps(response, indent = 4)   
-    return json_object
+    return jsonify(response), 200
 
 """
     @ Função: validar toda rede blockchain  
@@ -126,29 +132,13 @@ def get_chain(blockchain):
         - Objeto blockchain
     @ Return: json formatado com a mensagem de validação
 """
-def is_valid(blockchain):
+@app.route('/is_valid', methods = ['GET'])
+def is_valid():
     is_valid = blockchain.is_chain_valid(blockchain.chain)
     if is_valid:
-        response = {'message' : ' BLockchain validado! '}
+        response = {'message' : ' Blockchain validado! '}
     else:
-        response = {'message' : ' ALERT! Blockchain não valido. '}
-    json_object = json.dumps(response, indent = 4)   
-    return json_object
+        response = {'message' : ' ERRO! Blockchain não valido. '}
+    return jsonify(response), 200
 
-# MAIN /=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=--=-=
-blockchain = Blockchain()
-while True:
-    print("=-=-=-=-=-=-=-=-=-=-=-=|| MENU ||=-=-=-=-=-=-=-=-=-=-=-=")
-    print("""[1] Minerar Bloco      [2] Verificar rede      [3] Mostrar rede      [4] Sair""")
-    resp = int(input())
-    if resp == 1:
-        print(mine_block(blockchain))
-    elif resp == 2:
-        print(is_valid(blockchain))
-    elif resp == 3:
-        print(get_chain(blockchain))
-    else:
-        break
-        
-
-
+app.run(host = '0.0.0.0', port = 5000)
