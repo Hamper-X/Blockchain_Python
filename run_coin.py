@@ -2,13 +2,17 @@
 import datetime     #pegar data e hora exata
 import hashlib      #criar e usar hashs especificas
 import json         #produzir e ler dados e json
-from flask import Flask, jsonify
+from flask import Flask, jsonify, request
+import requests
+from uuid import uuid4
+from urllib.parse import urlparse
 
 # CLASSE BLOCKCHAIN |=-=-=-=-=-=-=-=-=-=-=-=
 class Blockchain:
 
     def __init__(self):
         self.chain = []
+        self.transactions = []
         self.create_block(proof = 1, previous_hash = '0')
 
     """
@@ -22,7 +26,9 @@ class Blockchain:
         block = {'index': len(self.chain) + 1,
                  'timestamp': str(datetime.datetime.now()),
                  'proof': proof,
-                 'previous_hash': previous_hash}
+                 'previous_hash': previous_hash,
+                 'transactions':self.transactions}
+        self.transactions = []
         self.chain.append(block)
         return block
 
@@ -85,6 +91,18 @@ class Blockchain:
             previous_block = block
             block_index += 1
         return True
+
+    """
+        @ Função: Adicionar transação  
+        @ Parametros:
+            - self (mostrando que é um metodo da classe)
+            - sender (quem enviou)
+            - receiver (quem recebeu)
+            - amount (valor/quantidade)
+        @ Return: 
+    """
+    def add_transaction(self,sender,receiver, amount):
+        self.transactions.append({'sender':sender, 'receiver':receiver, 'amount':amount})
 
 # MAIN /=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=--=-=
 app = Flask(__name__)
