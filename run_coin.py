@@ -14,6 +14,7 @@ class Blockchain:
         self.chain = []
         self.transactions = []
         self.create_block(proof = 1, previous_hash = '0')
+        self.nodes = set() # Objeto tipo set: Conjunto que obtem todos os nós participantes da rede
 
     """
         @ Função: criar novo bloco na chain 
@@ -99,10 +100,55 @@ class Blockchain:
             - sender (quem enviou)
             - receiver (quem recebeu)
             - amount (valor/quantidade)
-        @ Return: 
+        @ Return: index do bloco atual
     """
     def add_transaction(self,sender,receiver, amount):
         self.transactions.append({'sender':sender, 'receiver':receiver, 'amount':amount})
+        previous_block = self.get_previous_block()
+        return previous_block['index'] + 1
+
+    """
+        @ Função: Adição de no via endereço conforme é recebido 
+        @ Parametros:
+            - self (mostrando que é um metodo da classe)
+            - address (endereço)
+        @ Return: 
+    """
+    def add_node(self,address):
+        parsed_url = urlparse(address)
+        self.nodes.add(parsed_url.netloc)   # Adicionando esse endereço a lista(ao conjunto de nós)
+
+    #substituição da cadeia caso ela encontre uma cadeia que seja maior
+    def replace_chain(self):
+        network = self.nodes            # Copia dos nós
+        longest_chain = None            # Verificação para maior cadeia
+        max_length = len(self.chain)    # Pegando comprimento do blockchain
+        
+        for node in network:
+            response = requests.get(f'http://{node}/get_chain')
+            if response.status_code == 200:
+                length = response.json()['length']
+                chain = response.json()['chain']
+                if length > max_length and self.is_chain_valid(chain):
+                    max_length = length     # Atualização do maior tamanho
+                    longest_chain = chain   # Atualização do chain mais longo
+
+        if longest_chain != None:
+            self.chain = longest_chain  # Atualização o self.chain
+            return True
+        else:
+            return False
+
+
+
+
+
+
+
+
+
+
+
 
 # MAIN /=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=--=-=
 app = Flask(__name__)
