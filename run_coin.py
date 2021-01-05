@@ -112,17 +112,20 @@ class Blockchain:
         @ Parametros:
             - self (mostrando que é um metodo da classe)
             - address (endereço)
-        @ Return: 
     """
     def add_node(self,address):
         parsed_url = urlparse(address)
         self.nodes.add(parsed_url.netloc)   # Adicionando esse endereço a lista(ao conjunto de nós)
 
-    #substituição da cadeia caso ela encontre uma cadeia que seja maior
+    """
+        @ Função: substituição da cadeia caso ela encontre uma cadeia que seja maior 
+        @ Parametros:
+            - self (mostrando que é um metodo da classe)
+    """  
     def replace_chain(self):
         network = self.nodes            # Copia dos nós
         longest_chain = None            # Verificação para maior cadeia
-        max_length = len(self.chain)    # Pegando comprimento do blockchain
+        max_length = len(self.chain)    # Pegando comprimento maximo do blockchain
         
         for node in network:
             response = requests.get(f'http://{node}/get_chain')
