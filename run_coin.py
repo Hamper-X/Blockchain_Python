@@ -143,19 +143,10 @@ class Blockchain:
             return False
 
 
-
-
-
-
-
-
-
-
-
-
 # MAIN /=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=--=-=
 app = Flask(__name__)
 app.config['JSONIFY_PRETTYPRINT_REGULAR'] = False
+node_address = str(uuid4()).replace('-','')     #Transformando o endereço em texto e retirando os traços contidos entre os valores
 
 
 blockchain = Blockchain()
@@ -166,19 +157,20 @@ blockchain = Blockchain()
         - Objeto blockchain
     @ Return: json formatado com o bloco minerado e codigo de resposta
 """
-
 @app.route('/mine_block', methods = ['GET'])
 def mine_block():
     previous_block = blockchain.get_previous_block()
     previous_proof = previous_block['proof']
     proof = blockchain.proof_of_work(previous_proof)
     previous_hash = blockchain.hash(previous_block)
+    blockchain.add_transaction(sender= node_address,receiver="Lucas",amount=10)     # Adicionando a transação ao blockchain
     block = blockchain.create_block(proof, previous_hash)
     response = {'message': 'Parabens voce acabou de minerar um bloco!',
-                'index': block['index'],
-                'timestamp': block['timestamp'],
-                'proof': block['proof'],
-                'previous_hash': block['previous_hash']}
+                'index':            block['index'],
+                'timestamp':        block['timestamp'],
+                'proof':            block['proof'],
+                'previous_hash':    block['previous_hash'],
+                'transaction':      block['transactions']}
     return jsonify(response), 200  
 
 """
@@ -208,4 +200,23 @@ def is_valid():
         response = {'message' : ' ERRO! Blockchain não valido. '}
     return jsonify(response), 200
 
+@app.route('/add_transaction', methods = ['POST'])  # Usamos post pq estamos criamos alog, no caso uma transação.
+def add_transaction():
+    json = request.get_json()   # Pegar o arquivo json que o postman vai enviar e salva-lo na variavel json
+    transaction_key = ['sender','receiver','amont'] # Verificando se a transação é valida verificando as chaves
+    if not all(key in json for key in transaction_key):
+        return 'A transação possui elementos em falta', 400
+
+
+
+
+
+
 app.run(host = '0.0.0.0', port = 5000)
+
+'''
+Anotações |=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+Diferença entre GET e POST
+    * GET -> quando vc quer pegar algo. A exemplo, a mineração de um bloco, pois nao precisamos enviar nada.
+    * POST -> quando vc precisa criar algo para obter a resposta. A exemplo a criação de transações 
+'''
