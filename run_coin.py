@@ -206,7 +206,9 @@ def add_transaction():
     transaction_key = ['sender','receiver','amont'] # Verificando se a transação é valida verificando as chaves
     if not all(key in json for key in transaction_key):
         return 'A transação possui elementos em falta', 400
-
+    index - blockchain.add_transaction(json['sender'],json['receiver'],json['amount'])
+    response = {'messege':f'Esta transacao sera adicionada ao bloco {index}'}
+    return jsonify(response), 201 # Codigo 201 utilizado para quando temos um post
 
 
 
