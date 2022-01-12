@@ -1,2 +1,8 @@
 # Blockchain_Python
-Desenvolvendo uma rede blockchain do inicio (rede generica), ate sua aplicação em cripto moedas.
+EM DESENVOLVIMENTO.
+
+## Sobre:
+Esse projeto tem como intuito desenvolver uma rede gerérica blockchain do zero.
+
+## Futuro:
+Como forma de agregar a este projeto, futuramente, será implementado o desenvolvimento de uma cripto moeda e o uso de contratos Inteligentes.
