@@ -4,32 +4,39 @@ import hashlib      #criar e usar hashs especificas
 import json         #produzir e ler dados e json
 from flask import Flask, jsonify, request
 import requests
-from uuid import uuid4
+from uuid import uuid4  
 from urllib.parse import urlparse
 
-# CLASSE BLOCKCHAIN |=-=-=-=-=-=-=-=-=-=-=-=
+
+
+# CLASSE BLOCKCHAIN Convertida para MOEDA CRIPTOGRAFICA |=-=-=-=-=-=-=
+
 class Blockchain:
 
+    # Construtor 
     def __init__(self):
         self.chain = []
-        self.transactions = []
+        self.transactions = []      # Transações
         self.create_block(proof = 1, previous_hash = '0')
-        self.nodes = set() # Objeto tipo set: Conjunto que obtem todos os nós participantes da rede
+        self.nodes = set() # Conjunto que obtem todos os nós participantes da rede
 
     """
-        @ Função: criar novo bloco na chain 
+        @ Funcao: criar novo bloco na chain 
         @ Parametros:
             - self (mostrando que é um metodo da classe)
             - proof (valor que a função de mineração passara)
             - previus_hash (conexão com o bloco anterior)
+        @ Observacoes: possui suporte para transacoes 
     """
     def create_block(self, proof, previous_hash):
-        block = {'index': len(self.chain) + 1,
-                 'timestamp': str(datetime.datetime.now()),
-                 'proof': proof,
-                 'previous_hash': previous_hash,
-                 'transactions':self.transactions}
-        self.transactions = []
+        block = {
+            'index': len(self.chain) + 1,
+            'timestamp': str(datetime.datetime.now()),
+            'proof': proof,
+            'previous_hash': previous_hash,
+            'transactions':self.transactions
+        }
+        self.transactions = []  # Quando o bloco é criado a lista de transações precisa ser zerada 
         self.chain.append(block)
         return block
 
@@ -94,27 +101,33 @@ class Blockchain:
         return True
 
     """
-        @ Função: Adicionar transação  
+        @ Funcao: Adicionar transacao  
         @ Parametros:
-            - self (mostrando que é um metodo da classe)
-            - sender (quem enviou)
-            - receiver (quem recebeu)
-            - amount (valor/quantidade)
-        @ Return: index do bloco atual
+            - self      (mostrando que é um metodo da classe)
+            - sender    (quem enviou)
+            - receiver  (quem recebeu)
+            - amount    (valor/quantidade)
+        @ Return: index do bloco em que a transacao foi adicionada
     """
     def add_transaction(self,sender,receiver, amount):
-        self.transactions.append({'sender':sender, 'receiver':receiver, 'amount':amount})
+        self.transactions.append({
+            'sender':sender,
+            'receiver':receiver,
+            'amount':amount
+        })
         previous_block = self.get_previous_block()
         return previous_block['index'] + 1
 
     """
-        @ Função: Adição de no via endereço conforme é recebido 
+        @ Função: Adição de nós via endereço conforme é recebido 
         @ Parametros:
             - self (mostrando que é um metodo da classe)
             - address (endereço)
+        @ Obs: Endereco padrao do flask: 'http://127.0.0.1:5000/'
     """
     def add_node(self,address):
         parsed_url = urlparse(address)
+        # Netloc captura somente o endereco que queremos ( http://127.0.0.1:5000/ ==> 127.0.0.1:5000)
         self.nodes.add(parsed_url.netloc)   # Adicionando esse endereço a lista(ao conjunto de nós)
 
     """
