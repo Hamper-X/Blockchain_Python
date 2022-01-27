@@ -131,29 +131,29 @@ class Blockchain:
         self.nodes.add(parsed_url.netloc)   # Adicionando esse endereço a lista(ao conjunto de nós)
 
     """
-        @ Função: substituição da cadeia caso ela encontre uma cadeia que seja maior 
+        @ Função: substituição da cadeia caso ela encontre uma cadeia que seja maior (protocolo de consenso) 
         @ Parametros:
             - self (mostrando que é um metodo da classe)
     """  
     def replace_chain(self):
         network = self.nodes            # Copia dos nós
-        longest_chain = None            # Verificação para maior cadeia
+        longest_chain = None            # boolean - verificação para maior cadeia
         max_length = len(self.chain)    # Pegando comprimento maximo do blockchain
         
+        # Percorrendo cada nó da rede 
         for node in network:
-            response = requests.get(f'http://{node}/get_chain')
+            response = requests.get(f'http://{node}/get_chain') # Envio via REST passando o o servico get_chain e a porta {node}
             if response.status_code == 200:     # Verificação de validação de requisição (codigo 200 validado)
-                length = response.json()['length']
+                length = response.json()['length']  # Pagina retorna todo o comprimento, por isso guardaremos apenas o tamanho do blockchain retornado
                 chain = response.json()['chain']
                 if length > max_length and self.is_chain_valid(chain):
                     max_length = length     # Atualização do maior tamanho
                     longest_chain = chain   # Atualização do chain mais longo
 
-        if longest_chain != None:
+        if longest_chain:
             self.chain = longest_chain  # Atualização o self.chain
             return True
-        else:
-            return False
+        return False
 
 
 # MAIN /=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=--=-=
