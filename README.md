@@ -18,7 +18,10 @@ pip install flask
 ## Informações para Execução:
 - Endereço flask local inicial: http://127.0.0.1:5000/
     -- Para cada exemplo criado, a URL deve ser no seguinte formato: http://127.0.0.1:5001/metodo_escolhido
-    -- EX: Para solicitar o blockchain de determinado usuario, alteramos a porta dele, e chamamos o metodo get_chain -> http://127.0.0.1:5003/get_chain 
+    -- EX: Para solicitar o blockchain de determinado usuario, alteramos a porta dele, e chamamos o metodo get_chain -> http://127.0.0.1:5003/get_chain
+         div align="center"
+            img src="https://user-images.githubusercontent.com/56658737/151444383-461892ed-5319-40b4-9b0e-27d724d4c765.png" width="0px" /
+        /div
 - Cada vertente da run_coin.py deve ser executada simultaneamente para a geração dos dados transações
 - Para verificar, solicitar e alterar dados, basta usar a aplicação PostMan (Software gratuito)
 
