@@ -4,7 +4,7 @@ import hashlib      #criar e usar hashs especificas
 import json         #produzir e ler dados e json
 from flask import Flask, jsonify, request
 import requests
-from uuid import uuid4  
+from uuid import uuid4  # Permite a geração de um endereço unico de um objeto 
 from urllib.parse import urlparse
 
 
@@ -158,19 +158,17 @@ class Blockchain:
 
 # MAIN /=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=--=-=
 app = Flask(__name__)
-app.config['JSONIFY_PRETTYPRINT_REGULAR'] = False
+app.config['JSONIFY_PRETTYPRINT_REGULAR'] = False   # Comando necessario para aplicação do Flask nas novas versões
 node_address = str(uuid4()).replace('-','')     #Transformando o endereço em texto e retirando os traços contidos entre os valores
-
-
 blockchain = Blockchain()
 
+
 """
-    @ Função: mineração do bloco
-    @ Parametros:
-        - Objeto blockchain
+    @ Função: mineração do bloco 
+    @ Parametros:Objeto blockchain
     @ Return: json formatado com o bloco minerado e codigo de resposta
 """
-@app.route('/mine_block', methods = ['GET'])
+@app.route('/mine_block', methods = ['GET'])    # GET: Serve apenas para pegar. não envia dados e nem cria.
 def mine_block():
     previous_block = blockchain.get_previous_block()
     previous_proof = previous_block['proof']
@@ -213,15 +211,16 @@ def is_valid():
         response = {'message' : ' ERRO! Blockchain não valido. '}
     return jsonify(response), 200
 
-@app.route('/add_transaction', methods = ['POST'])  # Usamos post pq estamos criamos alog, no caso uma transação.
+@app.route('/add_transaction', methods = ['POST'])  # Usamos post pq estamos criamos algo, no caso uma transação.
 def add_transaction():
     json = request.get_json()   # Pegar o arquivo json que o postman vai enviar e salva-lo na variavel json
     transaction_key = ['sender','receiver','amont'] # Verificando se a transação é valida verificando as chaves
     if not all(key in json for key in transaction_key):
-        return 'A transação possui elementos em falta', 400
-    index - blockchain.add_transaction(json['sender'],json['receiver'],json['amount'])
+        return 'ERRO! A transação possui elementos em falta. Servidor não pode concluir a solicitação.', 400
+    
+    index = blockchain.add_transaction(json['sender'],json['receiver'],json['amount'])
     response = {'messege':f'Esta transacao sera adicionada ao bloco {index}'}
-    return jsonify(response), 201 # Codigo 201 utilizado para quando temos um post
+    return jsonify(response), 201 # Codigo 201 utilizado para quando temos um post com sucesso
 
 
 
