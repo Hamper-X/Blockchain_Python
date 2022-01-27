@@ -1,8 +1,13 @@
 # IMPORTS |=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 import datetime     #pegar data e hora exata
 import hashlib      #criar e usar hashs especificas
-import json         #produzir e ler dados e json
+import json
+from operator import is_
+from urllib import response         #produzir e ler dados e json
 from flask import Flask, jsonify, request
+from markupsafe import re
+from numpy import block
+from pandas import to_datetime
 import requests
 from uuid import uuid4  # Permite a geração de um endereço unico de um objeto 
 from urllib.parse import urlparse
@@ -211,6 +216,10 @@ def is_valid():
         response = {'message' : ' ERRO! Blockchain não valido. '}
     return jsonify(response), 200
 
+"""
+    @ Função: Adicao de transacao 
+    @ Return: json com codigo de validacao da operacao
+"""
 @app.route('/add_transaction', methods = ['POST'])  # Usamos post pq estamos criamos algo, no caso uma transação.
 def add_transaction():
     json = request.get_json()   # Pegar o arquivo json que o postman vai enviar e salva-lo na variavel json
@@ -222,15 +231,40 @@ def add_transaction():
     response = {'messege':f'Esta transacao sera adicionada ao bloco {index}'}
     return jsonify(response), 201 # Codigo 201 utilizado para quando temos um post com sucesso
 
+"""
+    @ Função: Request com retorno de todos os nos da rede 
+    @ Return: json formatado com todos os nós da rede 
+"""
+@app.route('/connect_node', methods = ['POST'])
+def connect_node():
+    json = request.get_json()
+    nodes = json.get('nodes')
+
+    # Verificar se a requisicao nao esta vazia 
+    if nodes is None:
+        return "ERRO! Conexão do nó foi invalida.", 400
+    for node in nodes:
+        blockchain.add_node(node)
+    response = {'message':'Todos os nós foram contabilizados e aderidos a rede:', 'total_nodes':list(blockchain.nodes)}
+    return jsonify(response),201
+
+"""
+    @ Função: Request para substituir a chain local
+    @ Return: 
+"""
+@app.route('/replace_chain',methods = ['GET'])
+def replace_chain():
+    is_chain_replaced = blockchain.replace_chain()
+    if is_chain_replaced:
+        response = {'message':'ALERTA! Detectado blockchain local alterado ou desatualizado. Atualizando blockchain.',
+        'new_chain': blockchain.chain}
+    else:
+        response = {'message':'ALERTA! Verificação da blockchain concluida. Nenhum processo ou alteração pendente.',
+        'actual_chain':blockchain.chain}
+    
+    return jsonify(response),201
 
 
 
+app.run(host = '0.0.0.0', port = 5000) # Porta 5000 será a porta inicial (Para cada no será agregado uma nova porta)
 
-app.run(host = '0.0.0.0', port = 5000)
-
-'''
-Anotações |=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
-Diferença entre GET e POST
-    * GET -> quando vc quer pegar algo. A exemplo, a mineração de um bloco, pois nao precisamos enviar nada.
-    * POST -> quando vc precisa criar algo para obter a resposta. A exemplo a criação de transações 
-'''
